@@ -25,7 +25,7 @@ class MiniGit
     args.each do |arg|
       case arg
       when Hash
-        arg.keys.sort.each do |k|
+        arg.keys.sort_by(&:to_s).each do |k|
           short = (k.to_s.length == 1)
           switch = short ? "-#{k}" : "--#{k}".gsub('_', '-')
           Array(arg[k]).each do |value|
@@ -39,6 +39,8 @@ class MiniGit
             end
           end
         end
+      when String
+        rv << arg
       when Enumerable
         rv += switches_for(*arg)
       when Symbol

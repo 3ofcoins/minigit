@@ -30,7 +30,7 @@ describe MiniGit do
     it 'recursively flattens the arrays' do
       assert { git.switches_for('foo', ['bar', 'baz'], 'quux') == %w'foo bar baz quux' }
       assert { git.switches_for('foo', ['bar', ['baz']], 'quux') == %w'foo bar baz quux' }
-      assert { git.switches_for('foo', ['bar', :baz => 'quux'], 'xyzzy') == %w'foo bar --baz=quux xyzzy' }
+      assert { git.switches_for('foo', ['bar', {:baz => 'quux'}], 'xyzzy') == %w'foo bar --baz=quux xyzzy' }
     end
 
     it 'multiplies the switch if hash value is an array' do
