@@ -5,10 +5,8 @@ Bundler.setup
 require 'fileutils'
 require 'pathname'
 
-if ENV['COVERAGE']
-  require 'simplecov'
-  SimpleCov.start
-end
+require 'simplecov'
+SimpleCov.start
 
 require 'minitest/spec'
 require 'minitest/autorun'

@@ -7,5 +7,4 @@ gemspec
 group :development_workstation do
   gem "pry", :require => false
   gem "minitest-ansi"
-  gem 'simplecov', :require => false
 end
