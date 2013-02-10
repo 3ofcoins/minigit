@@ -108,6 +108,19 @@ class MiniGit
     self
   end
 
+  if RUBY_VERSION =~ /^1\.8\./
+    def system(*args)
+      return Kernel.system(*args) unless args.first.is_a?(Hash)
+      begin
+        env, oenv = args.shift, {}
+        env.keys.each { |k| oenv[k], ENV[k] = ENV[k], env[k] }
+        Kernel.system(*args)
+      ensure
+        oenv.each { |k,v| if v.nil? then ENV.delete(k) else ENV[k] = v end }
+      end
+    end
+  end
+
   class Capturing < MiniGit
     attr_reader :shellout
 
