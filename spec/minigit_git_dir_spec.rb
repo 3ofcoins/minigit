@@ -46,6 +46,11 @@ describe MiniGit do
     it "throws an error when given a nonexistent path" do
       assert { ArgumentError === rescuing { git.find_git_dir('/does/not/exist') } }
     end
+
+    it "throws an error when git returns error code" do
+      Mixlib::ShellOut.any_instance.stubs(:error!).raises(Mixlib::ShellOut::ShellCommandFailed)
+      assert { ArgumentError === rescuing { git.find_git_dir('.') } }
+    end
   end
 
   describe '#initialize' do
