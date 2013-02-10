@@ -3,6 +3,14 @@ require 'mixlib/shellout'
 require "minigit/version"
 
 class MiniGit
+  class << self
+    attr_accessor :git_command
+
+    def method_missing(meth, *args, &block)
+      ( @myself ||= self.new ).git(meth, *args)
+    end
+  end
+
   class GitError < RuntimeError
     attr_reader :command, :status, :info
     def initialize(command, status, info={})
@@ -13,8 +21,8 @@ class MiniGit
     end
   end
 
-  class << self ; attr_accessor :git_command ; end
   attr_writer :git_command
+
   def git_command
     @git_command || self.class.git_command || MiniGit.git_command || 'git'
   end
@@ -67,10 +75,6 @@ class MiniGit
 
   def noncapturing
     self
-  end
-
-  def self.method_missing(meth, *args, &block)
-    ( @myself ||= self.new ).git(meth, *args)
   end
 
   class Capturing < MiniGit
