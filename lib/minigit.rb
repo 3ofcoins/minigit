@@ -13,9 +13,15 @@ class MiniGit
     end
   end
 
+  class << self ; attr_accessor :git_command ; end
+  attr_writer :git_command
+  def git_command
+    @git_command || self.class.git_command || MiniGit.git_command || 'git'
+  end
+
   def git(*args)
     argv = switches_for(*args)
-    system 'git', *argv
+    system git_command, *argv
     raise GitError.new(argv, $?) unless $?.success?
   end
 
@@ -72,7 +78,7 @@ class MiniGit
 
     def git(*args)
       argv = switches_for(*args)
-      @shellout = Mixlib::ShellOut.new('git', *argv)
+      @shellout = Mixlib::ShellOut.new(git_command, *argv)
       @shellout.run_command.error!
       @shellout.stdout
     rescue Mixlib::ShellOut::ShellCommandFailed

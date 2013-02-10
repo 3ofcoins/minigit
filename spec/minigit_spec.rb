@@ -3,6 +3,49 @@ require 'spec_helper'
 describe MiniGit do
   let(:git) { MiniGit.new }
 
+  describe '#git_command' do
+    it 'defaults to "git"' do
+      assert { git.git_command == 'git' }
+    end
+
+    it 'can be overriden per instance' do
+      git.git_command = 'other'
+      assert { git.git_command == 'other' }
+    end
+
+    it 'specifies how git is run' do
+      git.expects(:system).with('other', 'whatever', '--foo=bar')
+      git.git_command = 'other'
+      git.whatever :foo => 'bar'
+    end
+
+    it 'has precedence MiniGit -> class -> instance' do
+      gc = git.capturing
+
+      assert { git.git_command == 'git' }
+      assert { gc.git_command == 'git' }
+
+      MiniGit.git_command = 'foo'
+      assert { git.git_command == 'foo' }
+      assert { gc.git_command == 'foo' }
+
+      MiniGit::Capturing.git_command = 'bar'
+      assert { git.git_command == 'foo' }
+      assert { gc.git_command == 'bar' }
+
+      git.git_command = 'baz'
+      assert { git.git_command == 'baz' }
+      assert { gc.git_command == 'bar' }
+
+      gc.git_command = 'quux'
+      assert { git.git_command == 'baz' }
+      assert { gc.git_command == 'quux' }
+
+      MiniGit.git_command = nil
+      MiniGit::Capturing.git_command = nil
+    end
+  end
+
   describe '#git' do
     it 'calls git with given options' do
       git.expects(:system).with('git', 'status').then('git', 'log', '--oneline').once
@@ -13,13 +56,7 @@ describe MiniGit do
     end
 
     it 'raises an error if command fails' do
-      # Let's stub out the system() call to make sure it returns error
-      # code and doesn't print stuff out.
-      class << git
-        def system(*args)
-          Kernel.system('false')
-        end
-      end
+      git.git_command = 'false'
       assert { MiniGit::GitError === rescuing { git.git(:wrong) } }
       system 'true'         # to reset $? to a clean value
     end
@@ -54,6 +91,7 @@ describe MiniGit do
       end
 
       it 'raises an error if command fails' do
+        git.git_command = 'false'
         assert { MiniGit::GitError === rescuing { git.git(:wrong) } }
       end
     end
