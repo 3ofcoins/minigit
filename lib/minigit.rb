@@ -19,7 +19,7 @@ class MiniGit
     raise GitError.new(argv, $?) unless $?.success?
   end
 
-  def method_missing(meth, *args)
+  def method_missing(meth, *args, &block)
     self.git(meth, *args)
   end
 
@@ -61,6 +61,10 @@ class MiniGit
 
   def noncapturing
     self
+  end
+
+  def self.method_missing(meth, *args, &block)
+    ( @myself ||= self.new ).git(meth, *args)
   end
 
   class Capturing < MiniGit

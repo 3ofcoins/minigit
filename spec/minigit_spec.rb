@@ -72,4 +72,11 @@ describe MiniGit do
       end
     end
   end
+
+  describe '.method_missing' do
+    it 'calls out to a hidden instance of self' do
+      MiniGit.any_instance.expects(:system).with('git', 'status')
+      MiniGit.status
+    end
+  end
 end

@@ -16,3 +16,10 @@ else
 end
 
 require 'minigit'
+
+# MiniTest pokes into these methods, and triggers errors from
+# method_missing. Let's give it something to live with.
+class MiniGit
+  def self.to_str ; to_s ; end
+  def self.to_ary ; to_a ; end
+end
