@@ -126,8 +126,8 @@ class MiniGit
 
     def git(*args)
       argv = switches_for(*args)
-      @shellout = Mixlib::ShellOut.new(git_command, *argv,
-        :environment => { 'GIT_DIR' => git_dir, 'GIT_WORK_TREE' => git_work_tree })
+      argv << { :environment => { 'GIT_DIR' => git_dir, 'GIT_WORK_TREE' => git_work_tree } }
+      @shellout = Mixlib::ShellOut.new(git_command, *argv)
       @shellout.run_command.error!
       @shellout.stdout
     rescue Mixlib::ShellOut::ShellCommandFailed

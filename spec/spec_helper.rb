@@ -33,6 +33,6 @@ end
 class MiniTest::Spec
   attr_reader :tmp_path
   before do
-    @tmp_path = Pathname.new(__FILE__).dirname.dirname.join('tmp')
+    @tmp_path = Pathname.new(__FILE__).dirname.dirname.join('tmp').expand_path
   end
 end
