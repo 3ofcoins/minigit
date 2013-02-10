@@ -2,6 +2,9 @@ require 'rubygems'
 require 'bundler/setup'
 Bundler.setup
 
+require 'fileutils'
+require 'pathname'
+
 require 'minitest/spec'
 require 'minitest/autorun'
 require 'mocha/setup'
@@ -22,4 +25,11 @@ require 'minigit'
 class MiniGit
   def self.to_str ; to_s ; end
   def self.to_ary ; to_a ; end
+end
+
+class MiniTest::Spec
+  attr_reader :tmp_path
+  before do
+    @tmp_path = Pathname.new(__FILE__).dirname.dirname.join('tmp')
+  end
 end

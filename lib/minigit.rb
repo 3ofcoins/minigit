@@ -36,7 +36,8 @@ class MiniGit
     grp = Mixlib::ShellOut.new(
       git_command, 'rev-parse', '--git-dir', '--show-toplevel',
       :cwd => path.to_s)
-    grp.run_command.error!
+    grp.run_command
+    grp.error!
     grp.stdout.lines.map { |ln| path.join(Pathname.new(ln.strip)).realpath.to_s }
   rescue Mixlib::ShellOut::ShellCommandFailed
     raise ArgumentError, "Invalid repository path #{where}; Git said: #{grp.stderr.inspect}"
