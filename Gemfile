@@ -5,6 +5,7 @@ gemspec
 
 # Optional development environment
 group :development_workstation do
-  gem "pry"
+  gem "pry", :require => false
   gem "minitest-ansi"
+  gem 'simplecov', :require => false
 end
