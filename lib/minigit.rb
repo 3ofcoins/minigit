@@ -98,9 +98,9 @@ class MiniGit
   end
 
   def capturing
-    @capturing ||= Capturing.new(:git_command => git_command,
-                                 :git_dir => git_dir,
-                                 :git_work_tree => git_work_tree)
+    @capturing ||= Capturing.new(:git_command => @git_command,
+                                 :git_dir => @git_dir,
+                                 :git_work_tree => @git_work_tree)
   end
 
   def noncapturing
@@ -125,9 +125,9 @@ class MiniGit
     end
 
     def noncapturing
-      @noncapturing ||= MiniGit.new(:git_command => git_command,
-                                    :git_dir => git_dir,
-                                    :git_work_tree => git_work_tree)
+      @noncapturing ||= MiniGit.new(:git_command => @git_command,
+                                    :git_dir => @git_dir,
+                                    :git_work_tree => @git_work_tree)
     end
   end
 end
