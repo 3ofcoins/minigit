@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 describe MiniGit do
-  let(:git) { MiniGit::new }
+  let(:git) { MiniGit.new }
 
   describe '#git' do
     it 'calls git with given options' do
