@@ -31,4 +31,45 @@ describe MiniGit do
       git.rev_parse :git_dir => true
     end
   end
+
+  describe '#capturing' do
+    it 'returns instance of MiniGit::Capturing' do
+      assert { MiniGit::Capturing === git.capturing }
+    end
+  end
+
+  describe '#noncapturing' do
+    it 'returns instance of MiniGit' do
+      assert { MiniGit === git.noncapturing }
+      deny { MiniGit::Capturing == git.noncapturing }
+    end
+  end
+
+  describe MiniGit::Capturing do
+    let(:git) { MiniGit::Capturing.new }
+
+    describe "#git" do
+      it "calls git and returns its output as a string" do
+        assert { git.git(:help) =~ /commit/ }
+      end
+
+      it 'raises an error if command fails' do
+        assert { MiniGit::GitError === rescuing { git.git(:wrong) } }
+      end
+    end
+
+
+    describe '#capturing' do
+      it 'returns instance of MiniGit::Capturing' do
+        assert { MiniGit::Capturing === git.capturing }
+      end
+    end
+
+    describe '#noncapturing' do
+      it 'returns instance of MiniGit' do
+        assert { MiniGit === git.noncapturing }
+        deny { MiniGit::Capturing == git.noncapturing }
+      end
+    end
+  end
 end

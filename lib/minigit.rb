@@ -1,11 +1,14 @@
+require 'mixlib/shellout'
+
 require "minigit/version"
 
 class MiniGit
   class GitError < RuntimeError
-    attr_reader :command, :status
-    def initialize(command, status)
+    attr_reader :command, :status, :info
+    def initialize(command, status, info={})
       @status = status.dup
       @command = command
+      @info = info
       super("Failed to run git #{command.join(' ')}: #{@status}")
     end
   end
@@ -50,5 +53,34 @@ class MiniGit
       end
     end
     rv
+  end
+
+  def capturing
+    @capturing ||= Capturing.new
+  end
+
+  def noncapturing
+    self
+  end
+
+  class Capturing < MiniGit
+    attr_reader :shellout
+
+    def git(*args)
+      argv = switches_for(*args)
+      @shellout = Mixlib::ShellOut.new('git', *argv)
+      @shellout.run_command.error!
+      @shellout.stdout
+    rescue Mixlib::ShellOut::ShellCommandFailed
+      raise GitError.new(argv, @shellout.status, :shellout => @shellout)
+    end
+
+    def capturing
+      self
+    end
+
+    def noncapturing
+      @noncapturing ||= MiniGit.new
+    end
   end
 end
