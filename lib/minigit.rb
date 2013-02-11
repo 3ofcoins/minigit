@@ -5,7 +5,11 @@ require "minigit/version"
 
 class MiniGit
   class << self
-    attr_accessor :git_command
+    attr_writer :git_command
+
+    def git_command
+      @git_command || ( (self==::MiniGit) ? 'git' : ::MiniGit.git_command )
+    end
 
     def method_missing(meth, *args, &block)
       _myself.git(meth, *args)
@@ -36,7 +40,7 @@ class MiniGit
   attr_reader :git_dir, :git_work_tree
 
   def git_command
-    @git_command || self.class.git_command || MiniGit.git_command || 'git'
+    @git_command || self.class.git_command
   end
 
   def find_git_dir(where)

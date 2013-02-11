@@ -25,22 +25,35 @@ describe MiniGit do
 
       assert { git.git_command == 'git' }
       assert { gc.git_command == 'git' }
+      assert { MiniGit.git_command == 'git' }
+      assert { MiniGit::Capturing.git_command == 'git' }
 
       MiniGit.git_command = 'foo'
       assert { git.git_command == 'foo' }
       assert { gc.git_command == 'foo' }
+      assert { MiniGit.git_command == 'foo' }
+      assert { MiniGit::Capturing.git_command == 'foo' }
 
       MiniGit::Capturing.git_command = 'bar'
       assert { git.git_command == 'foo' }
       assert { gc.git_command == 'bar' }
+      assert { MiniGit.git_command == 'foo' }
+      assert { MiniGit::Capturing.git_command == 'bar' }
 
       git.git_command = 'baz'
       assert { git.git_command == 'baz' }
       assert { gc.git_command == 'bar' }
+      assert { MiniGit.git_command == 'foo' }
+      assert { MiniGit.new.git_command == 'foo' }
+      assert { MiniGit::Capturing.git_command == 'bar' }
 
       gc.git_command = 'quux'
       assert { git.git_command == 'baz' }
       assert { gc.git_command == 'quux' }
+      assert { MiniGit.git_command == 'foo' }
+      assert { MiniGit.new.git_command == 'foo' }
+      assert { MiniGit::Capturing.git_command == 'bar' }
+      assert { MiniGit::Capturing.new.git_command == 'bar' }
 
       MiniGit.git_command = nil
       MiniGit::Capturing.git_command = nil
