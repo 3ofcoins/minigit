@@ -118,4 +118,11 @@ describe MiniGit do
       MiniGit.status
     end
   end
+
+  describe '.git' do
+    it 'also calls out to a hidden instance of self' do
+      MiniGit.any_instance.expects(:system).with(GIT_ENV, 'git', 'status')
+      MiniGit.git :status
+    end
+  end
 end

@@ -8,7 +8,17 @@ class MiniGit
     attr_accessor :git_command
 
     def method_missing(meth, *args, &block)
-      ( @myself ||= self.new ).git(meth, *args)
+      _myself.git(meth, *args)
+    end
+
+    def git(*args)
+      _myself.git(*args)
+    end
+
+    protected
+
+    def _myself
+      @myself ||= self.new
     end
   end
 
