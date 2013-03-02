@@ -1,5 +1,5 @@
 require 'pathname'
-require 'mixlib/shellout'
+require 'shellwords'
 
 require "minigit/version"
 
@@ -29,7 +29,7 @@ class MiniGit
   class GitError < RuntimeError
     attr_reader :command, :status, :info
     def initialize(command, status, info={})
-      @status = status.dup
+      @status = status.dup rescue status.to_s
       @command = command
       @info = info
       super("Failed to run git #{command.join(' ')}: #{@status}")
@@ -47,14 +47,11 @@ class MiniGit
     path = Pathname.new(where)
     raise ArgumentError, "#{where} does not seem to exist" unless path.exist?
     path = path.dirname unless path.directory?
-    grp = Mixlib::ShellOut.new(
-      git_command, 'rev-parse', '--git-dir', '--show-toplevel',
-      :cwd => path.to_s)
-    grp.run_command
-    grp.error!
-    grp.stdout.lines.map { |ln| path.join(Pathname.new(ln.strip)).realpath.to_s }
-  rescue Mixlib::ShellOut::ShellCommandFailed
-    raise ArgumentError, "Invalid repository path #{where}; Git said: #{grp.stderr.inspect}"
+    Dir.chdir(path.to_s) do
+      out = `#{git_command} rev-parse --git-dir --show-toplevel`
+      raise ArgumentError, "Invalid repository path #{where}" unless $?.success?
+      out
+    end.lines.map { |ln| path.join(Pathname.new(ln.strip)).realpath.to_s }
   end
 
   def initialize(where=nil, opts={})
@@ -70,10 +67,11 @@ class MiniGit
 
   def git(*args)
     argv = switches_for(*args)
-    system(
-      {'GIT_DIR' => git_dir, 'GIT_WORK_TREE' => git_work_tree},
-      git_command, *argv)
-    raise GitError.new(argv, $?) unless $?.success?
+    with_git_env do
+      rv = system(git_command, *argv)
+      raise GitError.new(argv, $?) unless $?.success?
+      rv
+    end
   end
 
   def method_missing(meth, *args, &block)
@@ -122,32 +120,11 @@ class MiniGit
     self
   end
 
-  if RUBY_VERSION =~ /^1\.8\./
-#:nocov:
-    def system(*args)
-      return Kernel.system(*args) unless args.first.is_a?(Hash)
-      begin
-        env, oenv = args.shift, {}
-        env.keys.each { |k| oenv[k], ENV[k] = ENV[k], env[k] }
-        Kernel.system(*args)
-      ensure
-        oenv.each { |k,v| if v.nil? then ENV.delete(k) else ENV[k] = v end }
-      end
-    end
-#:nocov:
-  end
-
   class Capturing < MiniGit
-    attr_reader :shellout
+    attr_reader :process
 
-    def git(*args)
-      argv = switches_for(*args)
-      argv << { :environment => { 'GIT_DIR' => git_dir, 'GIT_WORK_TREE' => git_work_tree } }
-      @shellout = Mixlib::ShellOut.new(git_command, *argv)
-      @shellout.run_command.error!
-      @shellout.stdout
-    rescue Mixlib::ShellOut::ShellCommandFailed
-      raise GitError.new(argv, @shellout.status, :shellout => @shellout)
+    def system(*args)
+      `#{Shellwords.join(args)}`
     end
 
     def capturing
@@ -159,5 +136,17 @@ class MiniGit
                                     :git_dir => @git_dir,
                                     :git_work_tree => @git_work_tree)
     end
+  end
+
+  private
+
+  def with_git_env
+    dir, work_tree = ENV['GIT_DIR'], ENV['GIT_WORK_TREE']
+    ENV['GIT_DIR'] = git_dir
+    ENV['GIT_WORK_TREE'] = git_work_tree
+    yield
+  ensure
+    if dir then ENV['GIT_DIR'] = dir else ENV.delete('GIT_DIR') end
+    if work_tree then ENV['GIT_WORK_TREE'] = work_tree else ENV.delete('GIT_WORK_TREE') end
   end
 end
