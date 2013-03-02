@@ -1,7 +1,6 @@
 require 'spec_helper'
 
 describe MiniGit do
-  GIT_ENV = { 'GIT_DIR' => nil, 'GIT_WORK_TREE' => nil }
   let(:git) { MiniGit.new }
 
   describe '#git_command' do
@@ -15,7 +14,7 @@ describe MiniGit do
     end
 
     it 'specifies how git is run' do
-      git.expects(:system).with(GIT_ENV, 'other', 'whatever', '--foo=bar')
+      git.expects(:system).with('other', 'whatever', '--foo=bar')
       git.git_command = 'other'
       git.whatever :foo => 'bar'
     end
@@ -62,10 +61,10 @@ describe MiniGit do
 
   describe '#git' do
     it 'calls git with given options' do
-      git.expects(:system).with(GIT_ENV, 'git', 'status')
+      git.expects(:system).with('git', 'status')
       git.git(:status)
 
-      git.expects(:system).with(GIT_ENV, 'git', 'log', '--oneline').once
+      git.expects(:system).with('git', 'log', '--oneline').once
       git.git(:log, :oneline => true)
     end
 
@@ -127,14 +126,14 @@ describe MiniGit do
 
   describe '.method_missing' do
     it 'calls out to a hidden instance of self' do
-      MiniGit.any_instance.expects(:system).with(GIT_ENV, 'git', 'status')
+      MiniGit.any_instance.expects(:system).with('git', 'status')
       MiniGit.status
     end
   end
 
   describe '.git' do
     it 'also calls out to a hidden instance of self' do
-      MiniGit.any_instance.expects(:system).with(GIT_ENV, 'git', 'status')
+      MiniGit.any_instance.expects(:system).with('git', 'status')
       MiniGit.git :status
     end
   end

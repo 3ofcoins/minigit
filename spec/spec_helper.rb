@@ -9,7 +9,6 @@ require 'simplecov'
 SimpleCov.start do
   command_name 'MiniTest::Spec'
   minimum_coverage 95
-  refuse_coverage_drop
 end
 
 require 'minitest/spec'
