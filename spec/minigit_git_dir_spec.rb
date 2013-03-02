@@ -13,33 +13,39 @@ describe MiniGit do
   end
 
   describe '#find_git_dir' do
+    BACKTICK = :` # for broken syntax highlighting: `
     let(:git) { MiniGit.new }
 
     before :each do
-      Mixlib::ShellOut.any_instance.stubs(:run_command)
-      Mixlib::ShellOut.any_instance.stubs(:error!)
+      MiniGit.stubs(BACKTICK)
+    end
+
+    def rev_parse_returns(*rv)
+      git.expects(BACKTICK).
+        with('git rev-parse --git-dir --show-toplevel').
+        returns( rv.map{|v| "#{v}\n"}.join )
     end
 
     it "Returns a pair of pathnames by running `git rev-parse`" do
-      Mixlib::ShellOut.any_instance.stubs(:stdout).returns("#{git_dir}\n#{work_tree}\n")
+      rev_parse_returns(git_dir, work_tree)
       assert { git.find_git_dir('.') == [ git_dir.realpath.to_s, work_tree.realpath.to_s ] }
     end
 
     it "returns only a single pathname when only one pathname returned" do
-      Mixlib::ShellOut.any_instance.stubs(:stdout).returns("#{bare_git_dir}\n")
+      rev_parse_returns(bare_git_dir)
       assert { git.find_git_dir('.') == [ bare_git_dir.realpath.to_s ] }
     end
 
     it 'works fine with relative pathnames' do
-      Mixlib::ShellOut.any_instance.stubs(:stdout).returns(".git\n")
+      rev_parse_returns('.git')
       assert { git.find_git_dir(work_tree.to_s) == [ git_dir.realpath.to_s ] }
 
-      Mixlib::ShellOut.any_instance.stubs(:stdout).returns(".git\n")
+      rev_parse_returns('.git')
       assert { git.find_git_dir(work_tree.relative_path_from(Pathname.getwd).to_s) == [ git_dir.realpath.to_s ] }
     end
 
     it 'works fine when given a file' do
-      Mixlib::ShellOut.any_instance.stubs(:stdout).returns(".git\n.\n")
+      rev_parse_returns('.git', '.')
       assert { git.find_git_dir(file_in_work_tree.to_s) == [ git_dir.realpath.to_s, work_tree.realpath.to_s ] }
     end
 
@@ -48,7 +54,7 @@ describe MiniGit do
     end
 
     it "throws an error when git returns error code" do
-      Mixlib::ShellOut.any_instance.stubs(:error!).raises(Mixlib::ShellOut::ShellCommandFailed)
+      Process::Status.any_instance.expects(:success?).returns(false)
       assert { ArgumentError === rescuing { git.find_git_dir('.') } }
     end
   end
@@ -77,21 +83,35 @@ describe MiniGit do
   end
 
   describe '#git' do
+    class MiniGitEnvPeek < MiniGit
+      def system(*args)
+        Hash[ENV]
+      end
+    end
+
     it 'Calls system() with GIT_DIR and GIT_WORK_TREE environment variables set' do
-      git = MiniGit.new
-      git.expects(:system).with({'GIT_DIR' => nil, 'GIT_WORK_TREE' => nil}, 'git', 'status')
-      git.status
+      assert { ENV['GIT_DIR'].nil? }
+      assert { ENV['GIT_WORK_TREE'].nil? }
 
-      MiniGit.any_instance.expects(:find_git_dir).once.returns( [ bare_git_dir.realpath.to_s ] )
-      git = MiniGit.new('.')
-      git.expects(:system).with({'GIT_DIR' => bare_git_dir.realpath.to_s, 'GIT_WORK_TREE' => nil}, 'git', 'status')
-      git.status
+      MiniGitEnvPeek.any_instance.expects(:find_git_dir).once.returns( [ git_dir.realpath.to_s, work_tree.realpath.to_s ] )
+      git = MiniGitEnvPeek.new('.')
+      env = git.status
+      assert { env['GIT_DIR'] == git_dir.realpath.to_s }
+      assert { env['GIT_WORK_TREE'] == work_tree.realpath.to_s }
 
-      MiniGit.any_instance.expects(:find_git_dir).once.returns( [ git_dir.realpath.to_s, work_tree.realpath.to_s ] )
-      git = MiniGit.new('.')
-      git.expects(:system).with({'GIT_DIR' => git_dir.realpath.to_s, 'GIT_WORK_TREE' => work_tree.realpath.to_s}, 'git', 'status')
-      git.status
+      MiniGitEnvPeek.any_instance.expects(:find_git_dir).once.returns( [ bare_git_dir.realpath.to_s ] )
+      git = MiniGitEnvPeek.new('.')
+      env = git.status
+      assert { env['GIT_DIR'] == bare_git_dir.realpath.to_s }
+      assert { env['GIT_WORK_TREE'].nil? }
 
+      git = MiniGitEnvPeek.new
+      env = git.status
+      assert { env['GIT_DIR'].nil? }
+      assert { env['GIT_WORK_TREE'].nil? }
+
+      assert { ENV['GIT_DIR'].nil? }
+      assert { ENV['GIT_WORK_TREE'].nil? }
     end
   end
 end
