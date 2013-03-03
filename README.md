@@ -162,6 +162,17 @@ CustomGit.git_command                    # => "/path/to/git"
 CustomGit.new.git_command                # => "/path/to/git"
 ```
 
+### Debugging
+
+Set `MiniGit.debug` to true to see what MiniGit is doing:
+
+```ruby
+MiniGit.debug = true
+MiniGit.new('.').status
+  # + [/Users/japhy/Projekty/minigit] git rev-parse --git-dir --show-toplevel # => ".git\n/Users/japhy/Projekty/minigit\n"
+  # + git status
+```
+
 ## Issues
 
 Non-capturing MiniGit doesn't always play well when Git is configured

@@ -137,4 +137,22 @@ describe MiniGit do
       MiniGit.git :status
     end
   end
+
+  describe '.debug' do
+    before { MiniGit.debug = true  }
+    after  { MiniGit.debug = false }
+
+    it 'makes MiniGit print the commands it runs' do
+      git.stubs(:system)
+      out, err = capture_io { git.status }
+      assert { err.include?("+ git status\n") }
+    end
+
+    it 'makes MiniGit also print out rev-parse command with its directory' do
+      out, err = capture_io { MiniGit.new('.') }
+      assert { err.include?(
+          "+ [#{Dir.pwd}] git rev-parse --git-dir --show-toplevel # => "
+          ) }
+    end
+  end
 end
