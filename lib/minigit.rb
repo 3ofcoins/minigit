@@ -5,6 +5,7 @@ require "minigit/version"
 
 class MiniGit
   class << self
+    attr_accessor :debug
     attr_writer :git_command
 
     def git_command
@@ -49,6 +50,7 @@ class MiniGit
     path = path.dirname unless path.directory?
     Dir.chdir(path.to_s) do
       out = `#{git_command} rev-parse --git-dir --show-toplevel`
+      $stderr.puts "+ [#{Dir.pwd}] #{git_command} rev-parse --git-dir --show-toplevel # => #{out.inspect}" if MiniGit.debug
       raise ArgumentError, "Invalid repository path #{where}" unless $?.success?
       out
     end.lines.map { |ln| path.join(Pathname.new(ln.strip)).realpath.to_s }
@@ -68,6 +70,7 @@ class MiniGit
   def git(*args)
     argv = switches_for(*args)
     with_git_env do
+      $stderr.puts "+ #{git_command} #{Shellwords.join(argv)}" if MiniGit.debug
       rv = system(git_command, *argv)
       raise GitError.new(argv, $?) unless $?.success?
       rv
