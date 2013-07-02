@@ -6,5 +6,4 @@ gemspec
 # Optional development environment
 group :development_workstation do
   gem "pry", :require => false
-  gem "minitest-ansi"
 end
