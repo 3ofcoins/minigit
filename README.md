@@ -96,7 +96,7 @@ You can also provide a path specifying the Git repo. It can be:
  * a working directory
  * a file in or subdirectory of a working directory
  * a bare repository
- * a `.git` directory (which will be trated as a bare repository)
+ * a `.git` directory (which will be treated as a bare repository)
 
 MiniGit will find the Git directory and work tree automagically by
 calling out to `git rev-parse --git-dir --show-toplevel`, will set
