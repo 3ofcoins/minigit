@@ -7,3 +7,8 @@ gemspec
 group :development_workstation do
   gem "pry", :require => false
 end
+
+# Optional test environment
+group :test do
+  gem "rspec"
+end
