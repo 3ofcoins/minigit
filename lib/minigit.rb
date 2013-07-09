@@ -20,6 +20,14 @@ class MiniGit
       _myself.git(*args)
     end
 
+		def [](*args)
+			_myself[*args]
+		end
+
+		def []=(key, key2 = nil)
+			_myself[key, key2]
+		end
+
     protected
 
     def _myself
@@ -141,6 +149,22 @@ class MiniGit
     end
   end
 
+	def [](*args)
+    begin
+      MiniGit::Capturing.config(*args)
+    rescue
+      nil 
+    end
+  end
+
+	def []=(key, key2 = nil)
+    begin
+      MiniGit::Capturing.config(key, key2)
+    rescue
+      nil
+    end
+  end
+
   private
 
   def with_git_env
@@ -152,4 +176,5 @@ class MiniGit
     if dir then ENV['GIT_DIR'] = dir else ENV.delete('GIT_DIR') end
     if work_tree then ENV['GIT_WORK_TREE'] = work_tree else ENV.delete('GIT_WORK_TREE') end
   end
+
 end

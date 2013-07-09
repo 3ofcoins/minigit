@@ -87,8 +87,8 @@ git.capturing.branch    # => "* master\n"
 
 ```ruby
 cgit = MiniGit::Capturing.new
-git.branch              # => "* master\n"
-git.noncapturing.branch # => nil (output shown to the terminal)
+cgit.branch              # => "* master\n"
+cgit.noncapturing.branch # => nil (output shown to the terminal)
 ```
 
 You can also provide a path specifying the Git repo. It can be:
@@ -112,6 +112,22 @@ MiniGit.new('../vendorificator').log :n => 1, :oneline => true
     # b485d32 Merge branch 'release/0.1.1' into develop
 MiniGit.new('../vendorificator').capturing.log :n => 1, :oneline => true
     # => "b485d32 Merge branch 'release/0.1.1' into develop\n"
+```
+### Git config hash-like access
+
+You can call, modify and create new git config attributes with simple hash-like syntax:
+
+```ruby
+git = MiniGit.new
+git['user.email'] # => returns the user email assigned to the repository
+git['user.email'] = 'Foo@bar' # changes the user.email to foo@bar
+```
+
+The same works for class instance:
+
+```ruby
+MiniGit['user.email'] # => "foo@bar\n"
+MiniGit['user.email'] = 'foo@bar' # changes the user.email to foo@bar
 ```
 
 ### Git command
