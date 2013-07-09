@@ -14,8 +14,8 @@ describe MiniGit do
 		it 'assigns value to a git config attribute' do
 			git['bar.baz'] = 'foo'
 			MiniGit['bar.yyz'] = 'yyz'
-			assert { git['bar.baz'] == 'foo' }
-			assert { MiniGit['bar.yyz'] == 'yyz' }
+			assert { git['bar.baz'] == "foo\n" }
+			assert { MiniGit['bar.yyz'] == "yyz\n" }
 		end
 	end
 
