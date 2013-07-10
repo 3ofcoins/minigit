@@ -20,13 +20,13 @@ class MiniGit
       _myself.git(*args)
     end
 
-		def [](*args)
-			_myself[*args]
-		end
+    def [](*args)
+      _myself[*args]
+    end
 
-		def []=(key, key2 = nil)
-			_myself[key, key2]
-		end
+    def []=(key, key2 = nil)
+      _myself[key, key2]
+    end
 
     protected
 
@@ -123,8 +123,8 @@ class MiniGit
 
   def capturing
     @capturing ||= Capturing.new(:git_command => @git_command,
-                                 :git_dir => @git_dir,
-                                 :git_work_tree => @git_work_tree)
+      :git_dir => @git_dir,
+      :git_work_tree => @git_work_tree)
   end
 
   def noncapturing
@@ -144,20 +144,20 @@ class MiniGit
 
     def noncapturing
       @noncapturing ||= MiniGit.new(:git_command => @git_command,
-                                    :git_dir => @git_dir,
-                                    :git_work_tree => @git_work_tree)
+        :git_dir => @git_dir,
+        :git_work_tree => @git_work_tree)
     end
   end
 
-	def [](*args)
+  def [](*args)
     begin
       MiniGit::Capturing.config(*args)
     rescue
-      nil 
+      nil
     end
   end
 
-	def []=(key, key2 = nil)
+  def []=(key, key2 = nil)
     begin
       MiniGit::Capturing.config(key, key2)
     rescue
