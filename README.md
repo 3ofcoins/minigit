@@ -87,8 +87,8 @@ git.capturing.branch    # => "* master\n"
 
 ```ruby
 cgit = MiniGit::Capturing.new
-git.branch              # => "* master\n"
-git.noncapturing.branch # => nil (output shown to the terminal)
+cgit.branch              # => "* master\n"
+cgit.noncapturing.branch # => nil (output shown to the terminal)
 ```
 
 You can also provide a path specifying the Git repo. It can be:
@@ -185,9 +185,4 @@ ENV['GIT_PAGER'] = ''
 
 ## Contributing
 
-1. Fork it
-2. Create your feature branch (`git checkout -b my-new-feature`)
-3. Commit your changes (`git commit -am 'Add some feature'`), together
-   with specs for them
-4. Push to the branch (`git push origin my-new-feature`)
-5. Create new Pull Request
+See CONTRIBUTING.md
