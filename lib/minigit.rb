@@ -24,8 +24,8 @@ class MiniGit
       _myself[arg]
       end
 
-    def []=(value, value2 = nil)
-      _myself[value, value2]
+    def []=(key, value)
+      _myself[key] = value
     end
 
     protected
@@ -151,15 +151,15 @@ class MiniGit
 
     def [](arg)
       begin
-      MiniGit::Capturing.config(arg)
+      self.noncapturing.config(arg)
       rescue
-        nil 
+        nil
       end
     end
 
-    def []=(value, value2 = nil)
+    def []=(key, value)
       begin
-        MiniGit::Capturing.config(value, value2)
+        self.noncapturing.config(key, value)
       rescue
         nil
       end
