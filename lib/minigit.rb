@@ -20,13 +20,13 @@ class MiniGit
       _myself.git(*args)
     end
 
-		def [](*args)
-			_myself[*args]
-		end
+    def [](arg)
+      _myself[arg]
+      end
 
-		def []=(key, key2 = nil)
-			_myself[key, key2]
-		end
+    def []=(value, value2 = nil)
+      _myself[value, value2]
+    end
 
     protected
 
@@ -149,21 +149,21 @@ class MiniGit
     end
   end
 
-	def [](*args)
-    begin
-      MiniGit::Capturing.config(*args)
-    rescue
-      nil 
+    def [](arg)
+      begin
+      MiniGit::Capturing.config(arg)
+      rescue
+        nil 
+      end
     end
-  end
 
-	def []=(key, key2 = nil)
-    begin
-      MiniGit::Capturing.config(key, key2)
-    rescue
-      nil
+    def []=(value, value2 = nil)
+      begin
+        MiniGit::Capturing.config(value, value2)
+      rescue
+        nil
+      end
     end
-  end
 
   private
 
