@@ -120,13 +120,13 @@ You can call, modify and create new git config attributes with simple hash-like 
 ```ruby
 git = MiniGit.new
 git['user.email'] # => returns the user email assigned to the repository
-git['user.email'] = 'Foo@bar' # changes the user.email to foo@bar
+git['user.email'] = 'foo@bar' # changes the user.email to foo@bar
 ```
 
 The same works for class instance:
 
 ```ruby
-MiniGit['user.email'] # => "foo@bar\n"
+MiniGit['user.email'] # => "foo@bar"
 MiniGit['user.email'] = 'foo@bar' # changes the user.email to foo@bar
 ```
 
@@ -201,13 +201,4 @@ ENV['GIT_PAGER'] = ''
 
 ## Contributing
 
-<<<<<<< HEAD
-1. Fork it
-2. Create your feature branch (`git checkout -b feature/feature-name`)
-3. Commit your changes (`git commit -am 'Add some feature'`), together
-   with specs for them
-4. Push to the branch (`git push origin my-new-feature`)
-5. Create new Pull Request
-=======
 See CONTRIBUTING.md
->>>>>>> develop
