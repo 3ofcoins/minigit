@@ -37,7 +37,7 @@ class MiniGit
 
   class GitError < RuntimeError
     attr_reader :command, :status, :info
-    def initialize(command, status, info={})
+    def initialize(command=[], status=nil, info={})
       @status = status.dup rescue status.to_s
       @command = command
       @info = info
