@@ -152,7 +152,7 @@ class MiniGit
     def [](arg)
       begin
       self.noncapturing.config(arg)
-      rescue
+      rescue GitError
         nil
       end
     end
@@ -160,7 +160,7 @@ class MiniGit
     def []=(key, value)
       begin
         self.noncapturing.config(key, value)
-      rescue
+      rescue GitError
         nil
       end
     end
