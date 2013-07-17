@@ -8,8 +8,3 @@ group :development_workstation do
   gem "pry-stack_explorer", :require => false
   gem "pry", :require => false
 end
-
-# Optional test environment
-group :test do
-  gem "rspec"
-end
