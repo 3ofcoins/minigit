@@ -14,28 +14,53 @@ describe MiniGit do
   end
 
   describe '#[]' do
-    it 'returns a stripped configuration value if it exists' do
+    it 'returns nil if the passed in attribute has no value for class instance' do
       MiniGit::Capturing.any_instance.
         expects(:system).with('git', 'config', 'foo.bar').
         at_least_once.
-        returns("whatever\n")
-      assert { git['foo.bar'] == "whatever" }
+        raises(MiniGit::GitError)
+      assert { MiniGit['foo.bar'] == nil }
     end
   end
 
-  #  describe '[]' do
-  #    it 'returns nil if the passed in attribute has no value' do
-  #      assert { MiniGit['foo.bar'] == nil }
-  #    end
-  #  end
+  describe '#[]' do
+    it 'returns a stripped configuration value if it exists' do
+      MiniGit::Capturing.any_instance.
+        expects(:system).with('git', 'config', 'foo.baz').
+        at_least_once.
+        returns("whatever\n")
+      assert { git['foo.baz'] == "whatever" }
+    end
+  end
 
-  # describe '#[]=' do
-  #   it 'assigns value to a git config attribute' do
-  #     git['bar.baz'] = 'foo'
-  #     MiniGit['bar.yyz'] = 'yyz'
-  #     assert { git['bar.baz'] == "foo\n" }
-  #     assert { MiniGit['bar.yyz'] == "yyz\n" }
-  #   end
-  # end
+  describe '#[]' do
+    it 'returns a stripped configuration value if it exists for class instance' do
+      MiniGit::Capturing.any_instance.
+        expects(:system).with('git', 'config', 'foo.baz').
+        at_least_once.
+        returns("whatever\n")
+      assert { MiniGit['foo.baz'] == "whatever" }
+    end
+  end
+
+  describe '#[]=' do
+    it 'assigns value to a git config attribute' do
+      MiniGit::Capturing.any_instance.
+        expects(:system).with('git', 'config', 'bar.baz').
+        at_least_once.
+        returns('foo')
+      assert { git['bar.baz'] == 'foo' }
+    end
+  end
+
+  describe '#[]=' do
+    it 'assigns value to a git config attribute for class instance' do
+      MiniGit::Capturing.any_instance.
+        expects(:system).with('git', 'config', 'bar.baz').
+        at_least_once.
+        returns('foo')
+      assert { MiniGit['bar.baz'] == 'foo' }
+    end
+  end
 
 end
