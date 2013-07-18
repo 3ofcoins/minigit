@@ -41,22 +41,17 @@ describe MiniGit do
 
   describe '#[]=' do
     it 'assigns value to a git config attribute' do
-      MiniGit::Capturing.any_instance.
-        expects(:system).with('git', 'config', 'bar.baz').
-        at_least_once.
-        returns('foo')
-      assert { git['bar.baz'] == 'foo' }
+      MiniGit.any_instance.
+        expects(:system).with('git', 'config', 'bar.baz', 'foo')
+      git['bar.baz'] = 'foo'
     end
   end
 
   describe '.[]=' do
     it 'assigns value to a git config attribute for class instance' do
-      MiniGit::Capturing.any_instance.
-        expects(:system).with('git', 'config', 'bar.baz').
-        at_least_once.
-        returns('foo')
-      assert { MiniGit['bar.baz'] == 'foo' }
+      MiniGit.any_instance.
+        expects(:system).with('git', 'config', 'bar.baz', 'foo')
+      MiniGit['bar.baz'] = 'foo'
     end
   end
-
 end
