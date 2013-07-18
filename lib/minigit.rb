@@ -122,7 +122,8 @@ class MiniGit
   end
 
   def capturing
-    @capturing ||= Capturing.new(:git_command => @git_command,
+    @capturing ||= Capturing.new(
+      :git_command => @git_command,
       :git_dir => @git_dir,
       :git_work_tree => @git_work_tree)
   end
@@ -143,7 +144,8 @@ class MiniGit
     end
 
     def noncapturing
-      @noncapturing ||= MiniGit.new(:git_command => @git_command,
+      @noncapturing ||= MiniGit.new(
+        :git_command => @git_command,
         :git_dir => @git_dir,
         :git_work_tree => @git_work_tree)
     end
@@ -176,5 +178,4 @@ class MiniGit
     if dir then ENV['GIT_DIR'] = dir else ENV.delete('GIT_DIR') end
     if work_tree then ENV['GIT_WORK_TREE'] = work_tree else ENV.delete('GIT_WORK_TREE') end
   end
-
 end
