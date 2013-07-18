@@ -1,13 +1,21 @@
+---
 language: ruby
 bundler_args: --without development_workstation
 rvm:
-  - 1.8.7
-  - 1.9.2
-  - 1.9.3
-  - 2.0.0
-  - ree
-  - jruby-18mode
-  - jruby-19mode
-  - jruby-head
-  - rbx-18mode
-  - rbx-19mode
+- 1.8.7
+- 1.9.2
+- 1.9.3
+- 2.0.0
+- ree
+- jruby-18mode
+- jruby-19mode
+- jruby-head
+- rbx-18mode
+- rbx-19mode
+notifications:
+  hipchat:
+    secure: ! 'bGTLLC9qlBlOktqm1uuOmh1CkBASBxVzeTZrN45goL570X/uNnLXY54tly65
+
+      P2KaBzbWvUmBm2sy3sVIv0bOGP04eOP5nl/lvmRrr6GdonErhUqWDklFZBM3
+
+      29W4yd8Tr+1rHhCnwSGbhEDN9Q8UGVN+58rTPrwCFXBeidLBtjQ='

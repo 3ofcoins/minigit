@@ -106,6 +106,7 @@ describe MiniGit do
       it 'raises an error if command fails' do
         git.git_command = 'false'
         assert { MiniGit::GitError === rescuing { git.git(:wrong) } }
+        system 'true'         # to reset $? to a clean value
       end
     end
 

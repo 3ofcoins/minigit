@@ -11,17 +11,22 @@ SimpleCov.start do
   minimum_coverage 95
 end
 
-require 'minitest/spec'
 require 'minitest/autorun'
+require 'minitest/spec'
 require 'mocha/setup'
 require 'wrong'
-require 'wrong/adapters/minitest'
 
-begin
-  require 'minitest/ansi'
-rescue LoadError                # that's fine, we'll live without it
-else
-  MiniTest::ANSI.use! if STDOUT.tty?
+class MiniGit
+  module Spec
+    module WrongHelper
+      include Wrong::Assert
+      include Wrong::Helpers
+
+      def increment_assertion_count
+        self.assertions += 1
+      end
+    end
+  end
 end
 
 require 'minigit'
@@ -34,6 +39,8 @@ class MiniGit
 end
 
 class MiniTest::Spec
+  include MiniGit::Spec::WrongHelper
+
   attr_reader :tmp_path
   before do
     @tmp_path = Pathname.new(__FILE__).dirname.dirname.join('tmp').expand_path
