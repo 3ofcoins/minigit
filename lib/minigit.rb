@@ -20,6 +20,14 @@ class MiniGit
       _myself.git(*args)
     end
 
+    def [](arg)
+      _myself[arg]
+      end
+
+    def []=(key, value)
+      _myself[key] = value
+    end
+
     protected
 
     def _myself
@@ -29,7 +37,7 @@ class MiniGit
 
   class GitError < RuntimeError
     attr_reader :command, :status, :info
-    def initialize(command, status, info={})
+    def initialize(command=[], status=nil, info={})
       @status = status.dup rescue status.to_s
       @command = command
       @info = info
@@ -114,9 +122,10 @@ class MiniGit
   end
 
   def capturing
-    @capturing ||= Capturing.new(:git_command => @git_command,
-                                 :git_dir => @git_dir,
-                                 :git_work_tree => @git_work_tree)
+    @capturing ||= Capturing.new(
+      :git_command => @git_command,
+      :git_dir => @git_dir,
+      :git_work_tree => @git_work_tree)
   end
 
   def noncapturing
@@ -135,11 +144,28 @@ class MiniGit
     end
 
     def noncapturing
-      @noncapturing ||= MiniGit.new(:git_command => @git_command,
-                                    :git_dir => @git_dir,
-                                    :git_work_tree => @git_work_tree)
+      @noncapturing ||= MiniGit.new(
+        :git_command => @git_command,
+        :git_dir => @git_dir,
+        :git_work_tree => @git_work_tree)
     end
   end
+
+    def [](arg)
+      begin
+      self.capturing.config(arg).strip
+      rescue MiniGit::GitError
+        nil
+      end
+    end
+
+    def []=(key, value)
+      begin
+        self.noncapturing.config(key, value)
+      rescue MiniGit::GitError
+        nil
+      end
+    end
 
   private
 

@@ -96,7 +96,7 @@ You can also provide a path specifying the Git repo. It can be:
  * a working directory
  * a file in or subdirectory of a working directory
  * a bare repository
- * a `.git` directory (which will be trated as a bare repository)
+ * a `.git` directory (which will be treated as a bare repository)
 
 MiniGit will find the Git directory and work tree automagically by
 calling out to `git rev-parse --git-dir --show-toplevel`, will set
@@ -112,6 +112,22 @@ MiniGit.new('../vendorificator').log :n => 1, :oneline => true
     # b485d32 Merge branch 'release/0.1.1' into develop
 MiniGit.new('../vendorificator').capturing.log :n => 1, :oneline => true
     # => "b485d32 Merge branch 'release/0.1.1' into develop\n"
+```
+### Git config hash-like access
+
+You can call, modify and create new git config attributes with simple hash-like syntax:
+
+```ruby
+git = MiniGit.new
+git['user.email'] # => returns the user email assigned to the repository
+git['user.email'] = 'foo@bar' # changes the user.email to foo@bar
+```
+
+The same works on the class itself:
+
+```ruby
+MiniGit['user.email'] # => "foo@bar"
+MiniGit['user.email'] = 'foo@bar' # changes the user.email to foo@bar
 ```
 
 ### Git command
