@@ -11,19 +11,7 @@ describe MiniGit do
         raises(MiniGit::GitError)
       assert { git['foo.bar'] == nil }
     end
-  end
 
-  describe '#[]' do
-    it 'returns nil if the passed in attribute has no value for class instance' do
-      MiniGit::Capturing.any_instance.
-        expects(:system).with('git', 'config', 'foo.bar').
-        at_least_once.
-        raises(MiniGit::GitError)
-      assert { MiniGit['foo.bar'] == nil }
-    end
-  end
-
-  describe '#[]' do
     it 'returns a stripped configuration value if it exists' do
       MiniGit::Capturing.any_instance.
         expects(:system).with('git', 'config', 'foo.baz').
@@ -33,7 +21,15 @@ describe MiniGit do
     end
   end
 
-  describe '#[]' do
+  describe '.[]' do
+    it 'returns nil if the passed in attribute has no value for class instance' do
+      MiniGit::Capturing.any_instance.
+        expects(:system).with('git', 'config', 'foo.bar').
+        at_least_once.
+        raises(MiniGit::GitError)
+      assert { MiniGit['foo.bar'] == nil }
+    end
+
     it 'returns a stripped configuration value if it exists for class instance' do
       MiniGit::Capturing.any_instance.
         expects(:system).with('git', 'config', 'foo.baz').
@@ -53,7 +49,7 @@ describe MiniGit do
     end
   end
 
-  describe '#[]=' do
+  describe '.[]=' do
     it 'assigns value to a git config attribute for class instance' do
       MiniGit::Capturing.any_instance.
         expects(:system).with('git', 'config', 'bar.baz').
