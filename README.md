@@ -123,7 +123,7 @@ git['user.email'] # => returns the user email assigned to the repository
 git['user.email'] = 'foo@bar' # changes the user.email to foo@bar
 ```
 
-The same works for class instance:
+The same works on the class itself:
 
 ```ruby
 MiniGit['user.email'] # => "foo@bar"
