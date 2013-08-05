@@ -11,6 +11,7 @@ Gem::Specification.new do |gem|
   gem.description   = 'A simple Ruby interface for Git'
   gem.summary       = 'A simple Ruby interface for Git'
   gem.homepage      = "https://github.com/3ofcoins/minigit"
+  gem.license       = "MIT"
 
   gem.files         = `git ls-files`.split($/)
   gem.executables   = gem.files.grep(%r{^bin/}).map{ |f| File.basename(f) }
