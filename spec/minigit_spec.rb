@@ -14,7 +14,7 @@ describe MiniGit do
     end
 
     it 'specifies how git is run' do
-      git.expects(:run).with('other', 'whatever', '--foo=bar')
+      MiniGit::Spec::EXECUTOR.expects(:call).with('other', 'whatever', '--foo=bar')
       git.git_command = 'other'
       git.whatever :foo => 'bar'
     end
@@ -61,17 +61,16 @@ describe MiniGit do
 
   describe '#git' do
     it 'calls git with given options' do
-      git.expects(:run).with('git', 'status')
+      MiniGit::Spec::EXECUTOR.expects(:call).with('git', 'status')
       git.git(:status)
 
-      git.expects(:run).with('git', 'log', '--oneline').once
+      MiniGit::Spec::EXECUTOR.expects(:call).with('git', 'log', '--oneline').once
       git.git(:log, :oneline => true)
     end
 
     it 'raises an error if command fails' do
-      git.git_command = 'false'
+      MiniGit::Spec::EXECUTOR.expects(:call).with('git', 'wrong').raises(MiniGit::Executors::ExecuteError)
       assert { MiniGit::GitError === rescuing { git.git(:wrong) } }
-      system 'true'         # to reset $? to a clean value
     end
   end
 
@@ -100,13 +99,15 @@ describe MiniGit do
 
     describe "#git" do
       it "calls git and returns its output as a string" do
+        MiniGit::Spec::EXECUTOR.expects(:call).with('git', 'help').
+          returns(File.read(File.join(File.dirname(__FILE__),
+              'fixtures', 'git_help.txt')))
         assert { git.git(:help) =~ /commit/ }
       end
 
       it 'raises an error if command fails' do
-        git.git_command = 'false'
+        MiniGit::Spec::EXECUTOR.expects(:call).with('git', 'wrong').raises(MiniGit::Executors::ExecuteError)
         assert { MiniGit::GitError === rescuing { git.git(:wrong) } }
-        system 'true'         # to reset $? to a clean value
       end
     end
 
@@ -127,24 +128,26 @@ describe MiniGit do
 
   describe '.method_missing' do
     it 'calls out to a hidden instance of self' do
-      MiniGit.any_instance.expects(:run).with('git', 'status')
+      MiniGit::Spec::EXECUTOR.expects(:call).with('git', 'status')
       MiniGit.status
     end
   end
 
   describe '.git' do
     it 'also calls out to a hidden instance of self' do
-      MiniGit.any_instance.expects(:run).with('git', 'status')
+      MiniGit::Spec::EXECUTOR.expects(:call).with('git', 'status')
       MiniGit.git :status
     end
   end
 
   describe '.debug' do
-    before { MiniGit.debug = true  }
-    after  { MiniGit.debug = false }
+    before do
+      MiniGit.debug = true
+      MiniGit::Spec::EXECUTOR.stubs(:call).returns('')
+    end
+    after { MiniGit.debug = false }
 
     it 'makes MiniGit print the commands it runs' do
-      git.stubs(:run)
       out, err = capture_io { git.status }
       assert { err.include?("+ git status\n") }
     end

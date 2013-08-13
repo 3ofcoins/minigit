@@ -20,7 +20,7 @@ describe MiniGit do
     end
 
     def rev_parse_returns(*rv)
-      git.expects(:run).
+      MiniGit::Spec::EXECUTOR.expects(:call).
         with('git', 'rev-parse', '--git-dir', '--show-toplevel', :capture_stdout => true).
         returns( rv.map{|v| "#{v}\n"}.join )
     end
@@ -53,7 +53,7 @@ describe MiniGit do
     end
 
     it "throws an error when git returns error code" do
-      git.expects(:run).
+      MiniGit::Spec::EXECUTOR.expects(:call).
         with('git', 'rev-parse', '--git-dir', '--show-toplevel', :capture_stdout => true).
         raises(MiniGit::Executors::ExecuteError)
       assert { ArgumentError === rescuing { git.find_git_dir('.') } }
@@ -85,9 +85,7 @@ describe MiniGit do
 
   describe '#git' do
     class MiniGitEnvPeek < MiniGit
-      def run(*args)
-        Hash[ENV]
-      end
+      @executor = Proc.new { Hash[ENV] }
     end
 
     it 'Calls system() with GIT_DIR and GIT_WORK_TREE environment variables set' do
