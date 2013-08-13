@@ -14,7 +14,7 @@ describe MiniGit do
     end
 
     it 'specifies how git is run' do
-      git.expects(:system).with('other', 'whatever', '--foo=bar')
+      git.expects(:run).with('other', 'whatever', '--foo=bar')
       git.git_command = 'other'
       git.whatever :foo => 'bar'
     end
@@ -61,10 +61,10 @@ describe MiniGit do
 
   describe '#git' do
     it 'calls git with given options' do
-      git.expects(:system).with('git', 'status')
+      git.expects(:run).with('git', 'status')
       git.git(:status)
 
-      git.expects(:system).with('git', 'log', '--oneline').once
+      git.expects(:run).with('git', 'log', '--oneline').once
       git.git(:log, :oneline => true)
     end
 
@@ -127,14 +127,14 @@ describe MiniGit do
 
   describe '.method_missing' do
     it 'calls out to a hidden instance of self' do
-      MiniGit.any_instance.expects(:system).with('git', 'status')
+      MiniGit.any_instance.expects(:run).with('git', 'status')
       MiniGit.status
     end
   end
 
   describe '.git' do
     it 'also calls out to a hidden instance of self' do
-      MiniGit.any_instance.expects(:system).with('git', 'status')
+      MiniGit.any_instance.expects(:run).with('git', 'status')
       MiniGit.git :status
     end
   end
@@ -144,7 +144,7 @@ describe MiniGit do
     after  { MiniGit.debug = false }
 
     it 'makes MiniGit print the commands it runs' do
-      git.stubs(:system)
+      git.stubs(:run)
       out, err = capture_io { git.status }
       assert { err.include?("+ git status\n") }
     end

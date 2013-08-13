@@ -1,9 +1,36 @@
 require 'pathname'
-require 'shellwords'
+require 'shellwords'            # executors
 
 require "minigit/version"
 
 class MiniGit
+  module Executors
+    class ExecuteError < RuntimeError ; end
+
+    module System
+      def run(*command)
+        options = command.last.is_a?(Hash) ? command.pop : {}
+        if options[:capture_stdout]
+          rv = `#{Shellwords.join(command)}`
+        else
+          rv = ::Kernel.system(*command)
+        end
+      ensure
+        raise ExecuteError, ($?.dup rescue $?.to_s) unless $?.success?
+      end
+    end
+
+    module Backtick
+      include System
+      def run(*command)
+        options = command.last.is_a?(Hash) ? command.pop : {}
+        options[:capture_stdout] ||= true
+        command << options
+        super(*command)
+      end
+    end
+  end
+
   class << self
     attr_accessor :debug
     attr_writer :git_command
@@ -45,6 +72,8 @@ class MiniGit
     end
   end
 
+  include Executors::System
+
   attr_writer :git_command
   attr_reader :git_dir, :git_work_tree
 
@@ -57,11 +86,12 @@ class MiniGit
     raise ArgumentError, "#{where} does not seem to exist" unless path.exist?
     path = path.dirname unless path.directory?
     Dir.chdir(path.to_s) do
-      out = `#{git_command} rev-parse --git-dir --show-toplevel`
+      out = run(git_command, 'rev-parse', '--git-dir', '--show-toplevel', :capture_stdout => true)
       $stderr.puts "+ [#{Dir.pwd}] #{git_command} rev-parse --git-dir --show-toplevel # => #{out.inspect}" if MiniGit.debug
-      raise ArgumentError, "Invalid repository path #{where}" unless $?.success?
       out
     end.lines.map { |ln| path.join(Pathname.new(ln.strip)).realpath.to_s }
+  rescue Executors::ExecuteError => e
+    raise ArgumentError, "Invalid Git repository #{where.to_s}: #{e}"
   end
 
   def initialize(where=nil, opts={})
@@ -79,10 +109,10 @@ class MiniGit
     argv = switches_for(*args)
     with_git_env do
       $stderr.puts "+ #{git_command} #{Shellwords.join(argv)}" if MiniGit.debug
-      rv = system(git_command, *argv)
-      raise GitError.new(argv, $?) unless $?.success?
-      rv
+      run(git_command, *argv)
     end
+  rescue Executors::ExecuteError => e
+    raise GitError.new(argv, e)
   end
 
   def method_missing(meth, *args, &block)
@@ -135,9 +165,7 @@ class MiniGit
   class Capturing < MiniGit
     attr_reader :process
 
-    def system(*args)
-      `#{Shellwords.join(args)}`
-    end
+    include Executors::Backtick
 
     def capturing
       self
