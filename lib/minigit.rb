@@ -1,33 +1,9 @@
 require 'pathname'
-require 'shellwords'            # executors
 
 require "minigit/version"
+require 'minigit/executors'
 
 class MiniGit
-  module Executors
-    class ExecuteError < RuntimeError ; end
-
-    KERNEL_SYSTEM = Proc.new do |*command|
-      begin
-        options = command.last.is_a?(Hash) ? command.pop : {}
-        if options[:capture_stdout]
-          rv = `#{Shellwords.join(command)}`
-        else
-          rv = ::Kernel.system(*command)
-        end
-      ensure
-        raise ExecuteError, ($?.dup rescue $?.to_s) unless $?.success?
-      end
-    end
-
-    KERNEL_BACKTICK = Proc.new do |*command|
-      options = command.last.is_a?(Hash) ? command.pop : {}
-      options[:capture_stdout] ||= true
-      command << options
-      KERNEL_SYSTEM.call(*command)
-    end
-  end
-
   @executor = Executors::KERNEL_SYSTEM
 
   class << self
@@ -163,8 +139,15 @@ class MiniGit
     self
   end
 
+  module CapturingMixin
+    def executor
+      @capturing_executor ||= MiniGit::Executors.capturing(super)
+    end
+  end
+
   class Capturing < MiniGit
-    @executor = Executors::KERNEL_BACKTICK
+    include CapturingMixin
+
     attr_reader :process
 
     def capturing

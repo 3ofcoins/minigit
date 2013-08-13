@@ -45,9 +45,6 @@ class MiniGit
   def self.to_str ; to_s ; end
   def self.to_ary ; to_a ; end
   @executor = Spec::EXECUTOR
-  class Capturing
-    @executor = Spec::EXECUTOR
-  end
 end
 
 class MiniTest::Spec
