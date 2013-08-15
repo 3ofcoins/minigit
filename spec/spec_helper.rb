@@ -26,14 +26,6 @@ class MiniGit
         self.assertions += 1
       end
     end
-
-    class Executor
-      def call(*args)
-        raise RuntimeError, "Unprotected run: #{args.inspect}"
-      end
-    end
-
-    EXECUTOR = Executor.new
   end
 end
 
@@ -44,7 +36,7 @@ require 'minigit'
 class MiniGit
   def self.to_str ; to_s ; end
   def self.to_ary ; to_a ; end
-  @executor = Spec::EXECUTOR
+  @executor = Executor
 end
 
 class MiniTest::Spec

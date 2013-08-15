@@ -1,10 +1,11 @@
 require 'pathname'
 
 require "minigit/version"
-require 'minigit/executors'
+require 'minigit/executor'
+require 'minigit/executor/kernel'
 
 class MiniGit
-  @executor = Executors::KERNEL_SYSTEM
+  @executor = Executor::KernelExecutor
 
   class << self
     attr_accessor :debug
@@ -63,17 +64,18 @@ class MiniGit
     raise ArgumentError, "#{where} does not seem to exist" unless path.exist?
     path = path.dirname unless path.directory?
     Dir.chdir(path.to_s) do
-      out = self.class.executor.call(git_command, 'rev-parse', '--git-dir', '--show-toplevel', :capture_stdout => true)
+      out = @executor.capture(git_command, 'rev-parse', '--git-dir', '--show-toplevel')
       $stderr.puts "+ [#{Dir.pwd}] #{git_command} rev-parse --git-dir --show-toplevel # => #{out.inspect}" if MiniGit.debug
       out
     end.lines.map { |ln| path.join(Pathname.new(ln.strip)).realpath.to_s }
-  rescue Executors::ExecuteError => e
+  rescue Executor::ExecuteError => e
     raise ArgumentError, "Invalid Git repository #{where.to_s}: #{e}"
   end
 
   def initialize(where=nil, opts={})
     where, opts = nil, where if where.is_a?(Hash)
     @git_command = opts[:git_command] if opts[:git_command]
+    @executor = self.class.executor.new(opts)
     if where
       @git_dir, @git_work_tree = find_git_dir(where)
     else
@@ -86,9 +88,9 @@ class MiniGit
     argv = switches_for(*args)
     with_git_env do
       $stderr.puts "+ #{git_command} #{Shellwords.join(argv)}" if MiniGit.debug
-      self.class.executor.call(git_command, *argv)
+      @executor.run(git_command, *argv)
     end
-  rescue Executors::ExecuteError => e
+  rescue Executor::ExecuteError => e
     raise GitError.new(argv, e)
   end
 
@@ -130,6 +132,7 @@ class MiniGit
 
   def capturing
     @capturing ||= Capturing.new(
+      :capturing => true,
       :git_command => @git_command,
       :git_dir => @git_dir,
       :git_work_tree => @git_work_tree)
@@ -139,14 +142,12 @@ class MiniGit
     self
   end
 
-  module CapturingMixin
-    def executor
-      @capturing_executor ||= MiniGit::Executors.capturing(super)
-    end
-  end
-
   class Capturing < MiniGit
-    include CapturingMixin
+    def initialize(where=nil, opts={})
+      where, opts = nil, where if where.is_a?(Hash)
+      opts[:capturing] = true
+      super(where, opts)
+    end
 
     attr_reader :process
 
@@ -156,6 +157,7 @@ class MiniGit
 
     def noncapturing
       @noncapturing ||= MiniGit.new(
+        :capturing => false,
         :git_command => @git_command,
         :git_dir => @git_dir,
         :git_work_tree => @git_work_tree)
