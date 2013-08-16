@@ -1,6 +1,14 @@
 require 'minigit/executor/kernel'
 require 'minigit/executor/process_spawn' if Process.respond_to?(:spawn)
 
+begin
+  require 'posix/spawn'
+rescue ImportError
+  # pass
+else
+  require 'minigit/executor/posix_spawn'
+end
+
 class MiniGit
   class Executor
     class ExecuteError < RuntimeError ; end
@@ -26,6 +34,7 @@ class MiniGit
     end
 
     DefaultExecutor =
+      defined?(PosixSpawn)   ? PosixSpawn :
       defined?(ProcessSpawn) ? ProcessSpawn :
       System
   end
