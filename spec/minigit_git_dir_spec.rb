@@ -13,16 +13,15 @@ describe MiniGit do
   end
 
   describe '#find_git_dir' do
-    BACKTICK = :` # for broken syntax highlighting: `
     let(:git) { MiniGit.new }
 
     before :each do
-      MiniGit.stubs(BACKTICK)
+      MiniGit.stubs(:run)
     end
 
     def rev_parse_returns(*rv)
-      git.expects(BACKTICK).
-        with('git rev-parse --git-dir --show-toplevel').
+      MiniGit::Executor.any_instance.expects(:capture).
+        with('git', 'rev-parse', '--git-dir', '--show-toplevel').
         returns( rv.map{|v| "#{v}\n"}.join )
     end
 
@@ -54,7 +53,9 @@ describe MiniGit do
     end
 
     it "throws an error when git returns error code" do
-      Process::Status.any_instance.expects(:success?).returns(false)
+      MiniGit::Executor.any_instance.expects(:capture).
+        with('git', 'rev-parse', '--git-dir', '--show-toplevel').
+        raises(MiniGit::Executor::ExecuteError)
       assert { ArgumentError === rescuing { git.find_git_dir('.') } }
     end
   end
@@ -83,10 +84,14 @@ describe MiniGit do
   end
 
   describe '#git' do
-    class MiniGitEnvPeek < MiniGit
-      def system(*args)
+    class ReturnEnvExecutor < MiniGit::Executor
+      def run(*args)
         Hash[ENV]
       end
+    end
+
+    class MiniGitEnvPeek < MiniGit
+      @executor = ReturnEnvExecutor
     end
 
     it 'Calls system() with GIT_DIR and GIT_WORK_TREE environment variables set' do

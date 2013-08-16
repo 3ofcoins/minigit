@@ -1,12 +1,18 @@
 require 'pathname'
-require 'shellwords'
 
 require "minigit/version"
+require 'minigit/executor'
 
 class MiniGit
+  @executor = Executor::DefaultExecutor
+
   class << self
     attr_accessor :debug
     attr_writer :git_command
+
+    def executor
+      @executor || superclass.executor
+    end
 
     def git_command
       @git_command || ( (self==::MiniGit) ? 'git' : ::MiniGit.git_command )
@@ -57,16 +63,18 @@ class MiniGit
     raise ArgumentError, "#{where} does not seem to exist" unless path.exist?
     path = path.dirname unless path.directory?
     Dir.chdir(path.to_s) do
-      out = `#{git_command} rev-parse --git-dir --show-toplevel`
+      out = @executor.capture(git_command, 'rev-parse', '--git-dir', '--show-toplevel')
       $stderr.puts "+ [#{Dir.pwd}] #{git_command} rev-parse --git-dir --show-toplevel # => #{out.inspect}" if MiniGit.debug
-      raise ArgumentError, "Invalid repository path #{where}" unless $?.success?
       out
     end.lines.map { |ln| path.join(Pathname.new(ln.strip)).realpath.to_s }
+  rescue Executor::ExecuteError => e
+    raise ArgumentError, "Invalid Git repository #{where.to_s}: #{e}"
   end
 
   def initialize(where=nil, opts={})
     where, opts = nil, where if where.is_a?(Hash)
     @git_command = opts[:git_command] if opts[:git_command]
+    @executor = self.class.executor.new(opts)
     if where
       @git_dir, @git_work_tree = find_git_dir(where)
     else
@@ -79,10 +87,10 @@ class MiniGit
     argv = switches_for(*args)
     with_git_env do
       $stderr.puts "+ #{git_command} #{Shellwords.join(argv)}" if MiniGit.debug
-      rv = system(git_command, *argv)
-      raise GitError.new(argv, $?) unless $?.success?
-      rv
+      @executor.run(git_command, *argv)
     end
+  rescue Executor::ExecuteError => e
+    raise GitError.new(argv, e)
   end
 
   def method_missing(meth, *args, &block)
@@ -123,6 +131,7 @@ class MiniGit
 
   def capturing
     @capturing ||= Capturing.new(
+      :capturing => true,
       :git_command => @git_command,
       :git_dir => @git_dir,
       :git_work_tree => @git_work_tree)
@@ -133,11 +142,13 @@ class MiniGit
   end
 
   class Capturing < MiniGit
-    attr_reader :process
-
-    def system(*args)
-      `#{Shellwords.join(args)}`
+    def initialize(where=nil, opts={})
+      where, opts = nil, where if where.is_a?(Hash)
+      opts[:capturing] = true
+      super(where, opts)
     end
+
+    attr_reader :process
 
     def capturing
       self
@@ -145,6 +156,7 @@ class MiniGit
 
     def noncapturing
       @noncapturing ||= MiniGit.new(
+        :capturing => false,
         :git_command => @git_command,
         :git_dir => @git_dir,
         :git_work_tree => @git_work_tree)

@@ -8,7 +8,7 @@ require 'pathname'
 require 'simplecov'
 SimpleCov.start do
   command_name 'MiniTest::Spec'
-  minimum_coverage 95
+  minimum_coverage 90
 end
 
 require 'minitest/autorun'
@@ -36,6 +36,7 @@ require 'minigit'
 class MiniGit
   def self.to_str ; to_s ; end
   def self.to_ary ; to_a ; end
+  @executor = Executor
 end
 
 class MiniTest::Spec
