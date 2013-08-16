@@ -2,10 +2,9 @@ require 'pathname'
 
 require "minigit/version"
 require 'minigit/executor'
-require 'minigit/executor/kernel'
 
 class MiniGit
-  @executor = Executor::KernelExecutor
+  @executor = Executor::DefaultExecutor
 
   class << self
     attr_accessor :debug

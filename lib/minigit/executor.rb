@@ -1,3 +1,6 @@
+require 'minigit/executor/kernel'
+require 'minigit/executor/process_spawn' if Process.respond_to?(:spawn)
+
 class MiniGit
   class Executor
     class ExecuteError < RuntimeError ; end
@@ -21,5 +24,9 @@ class MiniGit
     def capture(*command)
       raise NotImplementedError
     end
+
+    DefaultExecutor =
+      defined?(ProcessSpawn) ? ProcessSpawn :
+      System
   end
 end
