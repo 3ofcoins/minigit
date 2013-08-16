@@ -3,7 +3,7 @@ require 'minigit/executor/process_spawn' if Process.respond_to?(:spawn)
 
 begin
   require 'posix/spawn'
-rescue ImportError
+rescue LoadError
   # pass
 else
   require 'minigit/executor/posix_spawn'

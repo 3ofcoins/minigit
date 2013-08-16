@@ -10,7 +10,7 @@ class MiniGit
 
       def capture(*command)
         child = POSIX::Spawn::Child.new(*command)
-        $stdout.puts child.err
+        $stderr.write(child.err) unless child.err.empty?
         raise ExecuteError, child.status unless child.status.success?
         child.out
       end
