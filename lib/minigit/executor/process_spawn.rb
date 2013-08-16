@@ -7,14 +7,13 @@ class MiniGit
       end
 
       def capture(*command)
-        # FIXME: actually read
-        r, w = IO.pipe
-        out = ''
-        pid = Process.spawn(*command, :out => w)
-        w.close
-        pid, status = Process.waitpid2(pid)
+        out_r, out_w = IO.pipe
+        out = Thread.new { out_r.read }
+        status = Process.detach(Process.spawn(*command, :out => out_w))
+        out_w.close
+        status = status.value
         raise ExecuteError, status unless status.success?
-        r.read
+        out.value
       end
     end
   end
