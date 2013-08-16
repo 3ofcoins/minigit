@@ -2,7 +2,7 @@ require 'shellwords'
 
 class MiniGit
   class Executor
-    class KernelExecutor < Executor
+    class KernelSystem < Executor
       def chatty(*command)
         handling_status do
           ::Kernel.system(*command)

@@ -36,6 +36,6 @@ class MiniGit
     DefaultExecutor =
       defined?(PosixSpawn)   ? PosixSpawn :
       defined?(ProcessSpawn) ? ProcessSpawn :
-      System
+      KernelSystem
   end
 end
