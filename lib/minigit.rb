@@ -56,10 +56,14 @@ class MiniGit
     path = Pathname.new(where)
     raise ArgumentError, "#{where} does not seem to exist" unless path.exist?
     path = path.dirname unless path.directory?
-    Dir.chdir(path.to_s) do
+    git_dir, work_tree = Dir.chdir(path.to_s) do
       out = `#{git_command} rev-parse --git-dir --show-toplevel`
       $stderr.puts "+ [#{Dir.pwd}] #{git_command} rev-parse --git-dir --show-toplevel # => #{out.inspect}" if MiniGit.debug
       raise ArgumentError, "Invalid repository path #{where}" unless $?.success?
+
+      # `--show-toplevel` has been introduced in Git 1.7.0. It's three
+      # years old now, so we just won't support older versions.
+      raise RuntimeError, "Git version >= 1.7.0 required" if out =~ /^--show-toplevel$/
       out
     end.lines.map { |ln| path.join(Pathname.new(ln.strip)).realpath.to_s }
   end

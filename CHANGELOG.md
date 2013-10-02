@@ -1,6 +1,11 @@
 Changes
 =======
 
+0.0.5 (to be released)
+----------------------
+ 
+- Crash with a meaningful message with git < 1.7.0
+
 0.0.4
 -----
 

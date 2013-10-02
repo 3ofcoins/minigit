@@ -57,6 +57,15 @@ describe MiniGit do
       Process::Status.any_instance.expects(:success?).returns(false)
       assert { ArgumentError === rescuing { git.find_git_dir('.') } }
     end
+
+    it "throws an error when running on unsupported version of git" do
+      # git < 1.7.0 just returns 0 and says ".git\n--show-toplevel\n"
+      # on `git rev-parse --git-dir --show-toplevel`.
+      rev_parse_returns('.git', '--show-toplevel')
+      exc = rescuing { git.find_git_dir('.') }
+      assert { RuntimeError === exc }
+      assert { exc.to_s =~ /Git version >= [\d\.]+ required/ }
+    end
   end
 
   describe '#initialize' do

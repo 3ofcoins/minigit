@@ -20,6 +20,10 @@ Or install it yourself as:
 
     $ gem install minigit
 
+### Requirements
+
+MiniGit won't work with git older than 1.7.0.
+
 ## Usage
 
 To use the library in your code, simply require it.
