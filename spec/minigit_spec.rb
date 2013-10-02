@@ -150,6 +150,9 @@ describe MiniGit do
     end
 
     it 'makes MiniGit also print out rev-parse command with its directory' do
+      MiniGit.any_instance.expects(:'`').
+        with('git rev-parse --git-dir --show-toplevel').
+        returns(".git\n/\n")
       out, err = capture_io { MiniGit.new('.') }
       assert { err.include?(
           "+ [#{Dir.pwd}] git rev-parse --git-dir --show-toplevel # => "
